@@ -10,8 +10,8 @@ abstract class Day(val id: Int) {
             "day$id.problem"
         )
 
-    protected abstract fun solve1(input: String): Int
-    protected abstract fun solve2(input: String): Int
+    protected abstract fun solve1(input: String): Number
+    protected abstract fun solve2(input: String): Number
     fun solve(): String {
         return "The result for day ${id}\ntask one is: ${solve1(problem)}\ntask two is: ${solve2(problem)}"
     }
