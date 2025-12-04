@@ -16,26 +16,28 @@ open class Day3: Day(3) {
             }.toInt()
         }
 
-    fun find(input: String): String {
-        var lastPossibleIndex = input.length-13
-        for ((index, value) in input.slice(1..lastPossibleIndex).withIndex()) {
-            var indices = mutableListOf(0)
-            var char = input[0]
-            when {
-                value > char -> {
-                    char = value
-                    indices = mutableListOf(index)
-                }
-                value == char -> indices.add(index)
-                else -> continue
-            }
+    fun maxJoltage(input: String): Long {
+        val windowSize = 11
+        val ixMappedInput = input.mapIndexed { index, c -> Pair(index, c) }
+
+        var lastPossibleIndex = input.length-windowSize
+        var retval = ""
+        var index = 0
+
+        while (index < lastPossibleIndex && retval.length < 12) {
+            val slice = ixMappedInput
+                .slice(index until lastPossibleIndex)
+            slice
+                .maxBy {  it.second }
+                .also { retval += it.second }
+                .also { index = it.first + 1 }
+                .also { lastPossibleIndex = input.length - (windowSize - retval.length)  }
         }
 
-        return "ind"
+        return retval.toLong()
     }
 
 
-    override fun solve2(input: String): Int {
-        return 0
-    }
+    override fun solve2(input: String): Long  =  input.lines().fold(0L) { acc, line -> acc + maxJoltage(line) }
+
 }
