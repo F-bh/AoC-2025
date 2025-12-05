@@ -3,11 +3,8 @@ package days
 import org.jetbrains.kotlinx.multik.api.mk
 import org.jetbrains.kotlinx.multik.api.ndarray
 import org.jetbrains.kotlinx.multik.ndarray.data.get
-import org.jetbrains.kotlinx.multik.ndarray.data.r
-import org.jetbrains.kotlinx.multik.ndarray.data.slice
 import org.jetbrains.kotlinx.multik.ndarray.operations.and
 import org.jetbrains.kotlinx.multik.ndarray.operations.count
-import org.jetbrains.kotlinx.multik.ndarray.operations.filter
 
 open class Day4: Day(4) {
     fun toGrid(input: String) = mk.ndarray(input
