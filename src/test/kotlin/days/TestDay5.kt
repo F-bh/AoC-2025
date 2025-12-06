@@ -26,7 +26,9 @@ class TestDay5: Day5() {
 
     @Test
     fun `task 2`() {
+        val got1 = this.mergeRanges(listOf(0L..10L, 10L..10L))
+        assertEquals(1, got1.size)
         val got = this.solve2(testInput)
-        assertEquals(14, got)
+        assertEquals(14L, got)
     }
 }
