@@ -1,8 +1,5 @@
 package days
 
-import kotlin.math.max
-import kotlin.streams.toList
-
 open class Day7: Day(7) {
   sealed interface Node {
     val x: Int
