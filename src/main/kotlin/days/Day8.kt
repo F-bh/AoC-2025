@@ -1,9 +1,9 @@
 package days
 
-import kotlin.math.sqrt
+import jdk.javadoc.internal.doclets.toolkit.util.DocPath.parent
 
 open class Day8 : Day(8) {
-  data class JunctionBox(val x: Long, val y: Long, val z: Long) {
+  data class JunctionBox( val id: Int, val x: Long, val y: Long, val z: Long, var parent: JunctionBox? = null) {
     fun distanceTo(to: JunctionBox): Long {
       val xDiff = this.x - to.x
       val yDiff = this.y - to.y
@@ -13,64 +13,64 @@ open class Day8 : Day(8) {
     }
   }
 
-  data class Connection(var parentIndex: Int, var index: Int, val distance: Long )
-
-  fun parse(input: String): List<JunctionBox> = input.lines().map {
-    val split = it.split(",")
-    JunctionBox(split[0].toLong(), split[1].toLong(), split[2].toLong())
+  tailrec fun getRoot(input: JunctionBox): JunctionBox {
+    if (input.parent == null) return input
+    return getRoot(input.parent!!)
   }
 
-   fun findParent(parents: Map<Int, Int>, toFind: Int): Int {
-    if (parents[toFind] == toFind) return toFind
-
-    parents[toFind] == findParent(parents, parents[toFind]!!)
-    return parents[toFind]!!
+  fun parse(input: String): List<JunctionBox> = input.lines().withIndex().map {
+    val split = it.value.split(",")
+    JunctionBox(it.index,split[0].toLong(), split[1].toLong(), split[2].toLong())
   }
 
-  fun union(parents: MutableMap<Int, Int>, a: Int, b: Int) {
-    val aParent = parents[a]
-    // make b's parent a's parent joining the two circuits
-    parents[b] = aParent!!
+  fun merge(a: JunctionBox, b: JunctionBox) {
+    a.parent = getRoot(b)
+  }
+
+  fun createConnections(input: List<JunctionBox>): List<JunctionBox>{
+    val connections = mutableListOf<JunctionBox>()
+    x@for (a in input) {
+      var shortestParent: JunctionBox? = null
+      for (b in input) {
+        if (b === a) continue
+
+        //check for duplicate connections i.e A->B; B->A
+        for (connection in connections){
+          if (connection.parent != null){
+            if (connection.parent!!.x == a.x && connection.parent!!.y == a.y && connection.parent!!.z == a.z){
+              continue@x
+            }
+          }
+        }
+
+        if (shortestParent == null){
+          shortestParent = b
+          continue
+        }
+
+        if (a.distanceTo(b) < a.distanceTo(shortestParent)) shortestParent = b
+
+      }
+      a.parent = shortestParent
+      connections.add(a)
+    }
+
+    return connections
   }
 
   override fun solve1(input: String): Number {
     val junctionBoxes = parse(input)
-    val distances = mutableListOf<Connection>()
-    val parents = junctionBoxes.indices.fold(mutableMapOf<Int, Int>()) { acc, it ->
-      acc[it] = it
-      acc
-    }
+    val connectedBoxes = createConnections(junctionBoxes)
 
-    //calculate distances between all nodes
-    for ((a, point) in junctionBoxes.withIndex()) {
-      for ((b, compareTo) in junctionBoxes.withIndex()) {
-        val distance = point.distanceTo(compareTo)
-        distances.add(Connection(a, b, distance))
-      }
-    }
+    val sortedByConnectionLength = connectedBoxes.sortedBy { it.distanceTo(it.parent!!) }
+    val topTen = sortedByConnectionLength.take(10)
+    val groupd = topTen.groupBy { getRoot(it) }
 
-    val sorted = distances.sortedByDescending { it.distance }
+    //for (connection in connectedBoxes){
+    //  merge(connection, connection.parent!!)
+    //}
 
-    for (pair in 0..10) {
-      val (a, b, _) = sorted[pair]
-      if (findParent(parents, a) == findParent(parents, b)) continue
-
-      //make sure a and b have the same root
-      union(parents, a, b)
-    }
-
-    val sizes = mutableMapOf<Int, Int>()
-
-    for (node in parents.values) {
-      val root = findParent(parents, node)
-      if (sizes[root] == null) {
-        sizes[root] = 1
-        continue
-      }
-      sizes[root] = sizes[root]!! + 1
-    }
-
-    return sizes.values.sorted().take(3).fold(1) { acc, i -> acc * i }
+    return 0
   }
 
 
